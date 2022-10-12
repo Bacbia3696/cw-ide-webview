@@ -1,14 +1,14 @@
-import { ChainInfo } from "@keplr-wallet/types";
 import {
-  BroadcastMode,
   AminoSignResponse,
+  BroadcastMode,
+  OfflineSigner,
   StdSignDoc,
   StdTx,
-  OfflineSigner,
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
-import { SecretUtils } from "secretjs/types/enigmautils";
+import { ChainInfo } from "@keplr-wallet/types";
 import Long from "long";
+import { SecretUtils } from "secretjs/types/enigmautils";
 
 export interface Key {
   // Name of the selected key store.

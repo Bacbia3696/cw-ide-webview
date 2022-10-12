@@ -1,8 +1,7 @@
+import { Select } from "antd";
 import "antd/dist/antd.css";
-import _ from "lodash";
-import { Button, Input, Select, Spin } from "antd";
-import { ReactComponent as IconSelect } from "../../assets/icons/code.svg";
 import { ReactComponent as IconChain } from "../../assets/icons/chain.svg";
+import { ReactComponent as IconSelect } from "../../assets/icons/code.svg";
 
 const interactList = [
   { key: 1, value: "execute" },

@@ -1,33 +1,45 @@
 import "antd/dist/antd.css";
 import _ from "lodash";
-import { Button, Input, Select, Spin } from "antd";
+import { Button, Select } from "antd";
 import { ReactComponent as IconSelect } from "../../assets/icons/code.svg";
 import { ReactComponent as IconChain } from "../../assets/icons/chain.svg";
-import { useEffect, useState } from "react";
-import { MyDropZone } from "..";
+import { useState } from "react";
+import { ChainInfoWithExplorer } from "src/stores/chain";
+import MyDropZone from "src/components/DropZone";
 
 const { Option } = Select;
 
-const CustomNetwork = ({ updateChain }) => {
-  const [defaultChainName, setDefaultChainName] = useState(window.chainStore.current.chainName);
+interface JsonFile {
+  content: ChainInfoWithExplorer;
+  fileName: string;
+  chainId: string;
+}
+
+interface CustomNetworkProps {
+  updateChain(_: string): void;
+}
+
+const CustomNetwork = ({ updateChain }: CustomNetworkProps) => {
+  const defaultChainName = useState(window.chainStore.current.chainName);
   const [chainInfos, setChainInfos] = useState(window.chainStore.chainInfos);
-  const [jsonFile, setJsonFile] = useState({});
+  const [jsonFileContent, setJsonFileContent] = useState(
+    {} as ChainInfoWithExplorer
+  );
   const [jsonFileName, setJsonFileName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
 
-  const handleJsonFile = (file) => {
-    setJsonFile(file.content);
-    setJsonFileName(file.fileName);
+  const handleJsonFile = (file: JsonFile) => {
+    setJsonFileContent(file.content);
+    setJsonFileName(file.fileName || "");
     setUpdateMessage("");
   };
 
   const onAddChain = () => {
     try {
       setErrorMessage("");
-      console.log("json file: ", jsonFile);
-      if (jsonFile.chainId) {
-        window.chainStore.addChain(jsonFile);
+      if (jsonFileContent.chainId) {
+        window.chainStore.addChain(jsonFileContent);
         // set chain to auto trigger new chain store
         setChainInfos(window.chainStore.chainInfos);
         setUpdateMessage("Successfully added the new chain");
@@ -41,21 +53,8 @@ const CustomNetwork = ({ updateChain }) => {
   const onRemoveChain = () => {
     try {
       setErrorMessage("");
-      if (jsonFile.chainId) {
-        // check if current chain id is the removed one. if yes => reset current chain id to the first chain id in list
-        const currentChainId = window.chainStore.current.chainId;
-        if (currentChainId === jsonFile.chainId) {
-          let chainName = window.chainStore.chainInfos[0].chainName;
-          window.chainStore.setChain(chainName);
-          updateChain(chainName);
-          window.location.reload();
-        }
-        window.chainStore.removeChain(jsonFile.chainId);
-        // set chain to auto trigger new chain store
-        setChainInfos(window.chainStore.chainInfos);
-        window.chainStore.setChain(window.chainStore.current.chainName);
-        setUpdateMessage("Successfully removed the provided chain");
-      } else throw "invalid chain data";
+      window.chainStore.removeChain(window.chainStore.current.chainId);
+      window.location.reload();
     } catch (error) {
       setErrorMessage(String(error));
       setUpdateMessage("");
@@ -80,12 +79,8 @@ const CustomNetwork = ({ updateChain }) => {
         style={{ width: 240 }}
         suffixIcon={<IconSelect />}
         onSelect={(value) => {
-          console.log("on select change chain data")
           window.chainStore.setChain(value);
           updateChain(value);
-          // setChainName(value);
-          // setGasPrice(window.chainStore.current.gasPriceStep?.average ? window.chainStore.current.gasPriceStep.average.toString() : "0");
-          // setGasDenom(window.chainStore.current.feeCurrencies[0].coinMinimalDenom);
         }}
       >
         {chainInfos.map((info) => (
@@ -103,7 +98,7 @@ const CustomNetwork = ({ updateChain }) => {
             Remove chain
           </Button>
         </div>
-        {_.isEmpty(jsonFile) && (
+        {_.isEmpty(jsonFileContent) && (
           <div
             style={{
               display: "flex",
@@ -134,7 +129,8 @@ const CustomNetwork = ({ updateChain }) => {
             </div>
             <Button
               onClick={() => {
-                setJsonFile({});
+                // reset state
+                setJsonFileContent({} as ChainInfoWithExplorer);
                 setJsonFileName("");
                 setUpdateMessage("");
                 setErrorMessage("");

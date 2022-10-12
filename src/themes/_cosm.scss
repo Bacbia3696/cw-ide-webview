@@ -1,25 +1,28 @@
-.app {
+.cosm {
   background: #191b20;
   height: 100vh;
   overflow: auto;
   padding: 16px 20px;
+  max-width: 40rem;
 
-  .app-header {
+  .cosm-header {
     color: white;
     display: flex;
     align-items: center;
 
-    .app-logo {
+    .cosm-logo {
       height: 40px;
     }
 
-    .app-title {
+    .cosm-title {
       font-size: 1.8rem;
       font-family: "Bebas";
-      background: -webkit-linear-gradient(45deg,
-          #f5cca3 0%,
-          #fd8ab6 50.52%,
-          #9a5beb 100%);
+      background: -webkit-linear-gradient(
+        45deg,
+        #f5cca3 0%,
+        #fd8ab6 50.52%,
+        #9a5beb 100%
+      );
       background-clip: text;
       margin: 0 0 0 12px;
       -webkit-background-clip: text;
@@ -27,18 +30,20 @@
     }
   }
 
-  .app-divider {
+  .cosm-divider {
     height: 1px;
-    background: linear-gradient(45deg,
-        #f5cca3 0%,
-        #fd8ab6 50.52%,
-        #9a5beb 100%);
+    background: linear-gradient(
+      45deg,
+      #f5cca3 0%,
+      #fd8ab6 50.52%,
+      #9a5beb 100%
+    );
     width: 100%;
     margin: 20px 0;
     opacity: 0.2;
   }
 
-  .app-body {
+  .cosm-body {
     .chain-select {
       margin-top: 20px;
 
@@ -270,7 +275,6 @@
     word-wrap: break-word;
   }
 }
-
 
 .contract {
   width: 100%;

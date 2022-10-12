@@ -3,6 +3,8 @@ import Form from "@rjsf/antd";
 import "antd/dist/antd.css";
 import _ from "lodash";
 import { Select } from "antd";
+import validator from "@rjsf/validator-ajv6";
+
 const { Option } = Select;
 
 const CustomSelect =
@@ -13,16 +15,11 @@ const CustomSelect =
           {...props}
           onChange={(value) => {
             // temp workaround, only update selection & reset schema when it's the first level of the schema
-            if (props.id === 'root__anyof_select') {
-              // console.log("ready to update selection ref");
+            if (props.id === "root__anyof_select") {
               selectionRef.current = +value;
               schemaObj.current = {};
             }
             onChange(+value);
-
-            // console.log("props: ", props);
-            // console.log("value selection: ", +value);
-            // console.log("enum options: ", enumOptions)
           }}
           value={value}
         >
@@ -48,15 +45,13 @@ const CustomForm = ({ schema, onSubmit }) => {
 
   return (
     <Form
-      widgets={widgets}
-      schema={schema}
+      widgets={widgets as any}
+      schema={schema as any}
+      validator={validator}
       onSubmit={({ formData, schema }) => {
-        // console.log("form data: ", formData)
-        // console.log("selection current: ", selection.current)
         const schemaItem = (schema.oneOf || schema.anyOf || schema)[
           selection.current
         ];
-        // console.log("schema item: ", schemaItem)
         const schemaKey = schemaItem?.required?.[0] || schema?.required?.[0];
         // in the case that the form data still returns correct form data => update schema
         if (formData[schemaKey]) {

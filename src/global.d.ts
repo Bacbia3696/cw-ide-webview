@@ -1,8 +1,8 @@
-import { BroadCastMode } from '@oraichain/cosmosjs';
-import Keplr from './lib/Keplr';
-import { Keplr as keplr } from './types/kelpr/wallet';
-import Wasm from './lib/wasm';
-import { ChainStore } from './stores/chain';
+import { BroadCastMode } from "@oraichain/cosmosjs";
+import Keplr from "./lib/Keplr";
+import { Keplr as keplr } from "./types/kelpr/wallet";
+import Wasm from "./lib/wasm";
+import { ChainStore } from "./stores/chain";
 
 declare global {
   type VSCode = {
@@ -39,7 +39,7 @@ declare global {
 
   type keplrType = keplr;
   interface Window {
-    chainStore: ChainStore,
+    chainStore: ChainStore;
     Keplr: Keplr;
     keplr: keplr;
   }
@@ -47,4 +47,4 @@ declare global {
   declare const APP_SETTINGS: Record<string, any>;
 }
 
-export { };
+export {};
