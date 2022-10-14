@@ -3,6 +3,8 @@ import { Button, Spin } from "antd";
 import _, { isNil } from "lodash";
 import { useRef, useState } from "react";
 import ReactJson from "react-json-view";
+import CosmUpload from "src/components/CosmUpload";
+import CosmAddress from "src/components/CosmAddress";
 import CustomForm from "src/components/CustomForm";
 import CustomInput from "src/components/CustomInput";
 import CustomNetwork from "src/components/CustomNetwork";
@@ -11,8 +13,10 @@ import MyDropZone from "src/components/DropZone";
 import HandleOptions from "src/components/HandleOptions";
 import CosmJsFactory from "src/lib/cosmjs-factory";
 import { parseGasLimits } from "src/lib/utils";
+import { updateSchemaFile } from "src/stores/contract/slice";
+import { useAppDispatch } from "src/stores/hooks";
 import "../../themes/style.scss";
-import "./AdvancedInteraction.css";
+import "./style.scss";
 
 const antIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#7954FF" }} spin />
@@ -23,8 +27,6 @@ interface AdvancedInteractionProps {
   gasData: any;
   mnemonic: any;
 }
-
-// TODO: persist mn
 
 const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
   children,
@@ -48,25 +50,17 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
   const [migrateContractAddr, setMigrateContractAddr] = useState("");
   const handleOptionsRef = useRef(null);
 
-  const onQuery = async (data) => {
-    console.log("onQuery", "data", data);
-    setErrorMessage("");
-    setResultTxHash(null);
-    setIsInteractionLoading(true);
-    let cosmJs = new CosmJsFactory(window.chainStore.current);
-    try {
-      let finalMessage = queryMessage;
-      if (data) finalMessage = JSON.stringify(data || "");
-      const queryResult = await cosmJs.current.query(
-        contractAddr,
-        finalMessage
-      );
-      console.log("query result: ", queryResult);
-      setResultJson({ data: queryResult });
-    } catch (error) {
-      setErrorMessage(String(error));
-    }
-    setIsInteractionLoading(false);
+  const [fileName, setFileName] = useState("");
+  const dispatch = useAppDispatch();
+
+  const handleJsonFile = (file: { fileName: string; content: any }) => {
+    setFileName(file.fileName);
+    dispatch(updateSchemaFile(file.content));
+  };
+
+  const handleRemove = () => {
+    setFileName("");
+    dispatch(updateSchemaFile({}));
   };
 
   const onHandle = async (data) => {
@@ -87,6 +81,27 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
         gasLimits: parseGasLimits(gasData.gasLimits),
         handleOptions: handleOptionsRef.current,
       });
+      console.log("query result: ", queryResult);
+      setResultJson({ data: queryResult });
+    } catch (error) {
+      setErrorMessage(String(error));
+    }
+    setIsInteractionLoading(false);
+  };
+
+  const onQuery = async (data) => {
+    console.log("onQuery", "data", data);
+    setErrorMessage("");
+    setResultTxHash(null);
+    setIsInteractionLoading(true);
+    let cosmJs = new CosmJsFactory(window.chainStore.current);
+    try {
+      let finalMessage = queryMessage;
+      if (data) finalMessage = JSON.stringify(data || "");
+      const queryResult = await cosmJs.current.query(
+        contractAddr,
+        finalMessage
+      );
       console.log("query result: ", queryResult);
       setResultJson({ data: queryResult });
     } catch (error) {
@@ -139,30 +154,15 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
             <Button onClick={() => onQuery(null)} className="primary-button">
               Query
             </Button>
-            <div style={{ cursor: "pointer", fontFamily: "Courier" }}>
-              <MyDropZone
-                setSchema={setQuerySchema}
-                setJson={null}
-                dropZoneText={"Upload the schema file"}
-              />
-            </div>
           </div>
         )) || (
-          <div style={{ marginBottom: "10px" }}>
-            <CustomForm
-              schema={querySchema}
-              onSubmit={(data) => onQuery(data)}
-            />
-            <Button
-              onClick={() => {
-                setQuerySchema({});
-              }}
-              className="remove-button"
-            >
-              Remove schema form
-            </Button>
-          </div>
-        )}
+            <div style={{ marginBottom: "10px" }}>
+              <CustomForm
+                schema={querySchema}
+                onSubmit={(data) => onQuery(data)}
+              />
+            </div>
+          )}
       </div>
     </div>
   );
@@ -196,13 +196,6 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
             >
               Migrate
             </Button>
-            <div style={{ cursor: "pointer", fontFamily: "Courier" }}>
-              <MyDropZone
-                setSchema={setMigrateSchema}
-                setJson={null}
-                dropZoneText={"Upload the schema file"}
-              />
-            </div>
           </div>
         )}
         {!_.isEmpty(migrateSchema) && (
@@ -211,14 +204,6 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
               schema={migrateSchema}
               onSubmit={(data) => onMigrate(data)}
             />
-            <Button
-              onClick={() => {
-                setMigrateSchema({});
-              }}
-              className="remove-button"
-            >
-              Remove schema form
-            </Button>
           </div>
         )}
       </div>
@@ -249,13 +234,6 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
             >
               Execute
             </Button>
-            <div style={{ cursor: "pointer", fontFamily: "Courier" }}>
-              <MyDropZone
-                setSchema={setHandleSchema}
-                setJson={null}
-                dropZoneText={"Upload the schema file"}
-              />
-            </div>
           </div>
         )}
         {!_.isEmpty(handleSchema) && (
@@ -264,40 +242,58 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
               schema={handleSchema}
               onSubmit={(data) => onHandle(data)}
             />
-            <Button
-              onClick={() => {
-                setHandleSchema({});
-              }}
-              className="remove-button"
-            >
-              Remove schema form
-            </Button>
           </div>
         )}
       </div>
     </div>
   );
 
+  const form =
+    interactOption === "execute"
+      ? executionForm
+      : "query"
+        ? queryForm
+        : "migration"
+          ? migrateForm
+          : null;
+
+  const result = (
+    <div style={{ marginTop: "10px" }}>
+      <ReactJson
+        collapseStringsAfterLength={20}
+        name={false}
+        displayObjectSize={true}
+        src={resultJson}
+        theme={"ocean"}
+      />
+    </div>
+  );
+
   return (
     <div className="cosm-body">
       <CustomNetwork updateChain={updateChain} />
+      <CosmUpload />
+      <CosmAddress />
 
-      <div className="wrap-form">
-        <CustomInput
-          inputHeader="Contract address"
-          input={contractAddr}
-          setInput={setContractAddr}
-          placeholder="eg. shareledger1mms7cehvyx7pxp7lllt0mn47hz5ufxwfwc2t95"
-        />
-      </div>
-
+      <div className="app-divider" />
+      {(fileName && (
+        <div>
+          <div>{`file name: ${fileName}`}</div>
+          <Button onClick={handleRemove} className="remove-secondary">
+            Remove CosmWasm schema
+          </Button>
+        </div>
+      )) || (
+          <MyDropZone
+            setJson={handleJsonFile}
+            dropZoneText={"Upload the CosmWasm schema"}
+          />
+        )}
       <CustomSelect
         displayMigrateOption={true}
         setInteractOption={setInteractOption}
       />
-      {interactOption === "execute" && executionForm}
-      {interactOption === "query" && queryForm}
-      {interactOption === "migrate" && migrateForm}
+      {form}
       <div className="app-divider" />
 
       {!isInteractionLoading ? (
@@ -321,17 +317,8 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
           <span>Invoking ...</span>
         </div>
       )}
-      {!_.isEmpty(resultJson) && (
-        <div style={{ marginTop: "10px" }}>
-          <ReactJson
-            collapseStringsAfterLength={20}
-            name={false}
-            displayObjectSize={false}
-            src={resultJson}
-            theme={"ocean"}
-          />
-        </div>
-      )}
+
+      {!_.isEmpty(resultJson) && result}
     </div>
   );
 };

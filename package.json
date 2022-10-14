@@ -17,12 +17,13 @@
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx",
     "watch": "tsc -watch -p tsconfig.extension.json",
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
+    "start": "react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts --max_old_space_size=8192 build"
   },
   "devDependencies": {
     "@cosmjs/launchpad": "^0.26.2",
     "@cosmjs/proto-signing": "^0.26.5",
+    "@types/json-schema": "^7.0.11",
     "@types/lodash": "^4.14.177",
     "@types/mocha": "^9.0.0",
     "@types/node": "^12.12.0",
@@ -54,12 +55,16 @@
     "@keplr-wallet/cosmos": "^0.9.6",
     "@keplr-wallet/stores": "^0.9.6",
     "@keplr-wallet/types": "^0.9.6",
+    "@reduxjs/toolkit": "^1.8.6",
     "@rjsf/antd": "^5.0.0-beta.11",
     "@rjsf/core": "^5.0.0-beta.11",
     "@rjsf/validator-ajv6": "^5.0.0-beta.11",
+    "@types/styled-components": "^5.1.26",
     "antd": "^4.23.5",
     "base64-arraybuffer": "^1.0.1",
+    "clsx": "^1.2.1",
     "dayjs": "^1.11.5",
+    "json-schema": "^0.4.0",
     "lodash": "^4.17.21",
     "mobx-react-lite": "^3.2.2",
     "react": "^17.0.2",
@@ -67,6 +72,7 @@
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.4.2",
     "react-json-view": "^1.21.3",
+    "react-redux": "^8.0.4",
     "styled-components": "^5.3.3"
   },
   "resolutions": {

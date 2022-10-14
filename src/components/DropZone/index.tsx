@@ -1,4 +1,5 @@
-import { useCallback, useMemo } from "react";
+import clsx from "clsx";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { processSchema } from "src/lib/utils";
 import styled from "styled-components";
@@ -23,6 +24,8 @@ const Container = styled.div`
   padding: 20px;
   border-width: 1px;
   border-radius: 5px;
+  cursor: pointer;
+  font-family: "Courier",
   border-color: ${(props) => getColor(props)};
   background-color: #312e38;
   color: #bdbdbd;
@@ -31,7 +34,22 @@ const Container = styled.div`
   transition: border 0.24s ease-in-out;
 `;
 
-const MyDropZone = ({ setSchema, setJson, dropZoneText }) => {
+interface MyDropZoneProps {
+  setSchema?: any;
+  setJson?: any;
+  setText?: any;
+  setBase64?: any;
+  dropZoneText?: any;
+  className?: string;
+}
+
+const MyDropZone: React.FC<MyDropZoneProps> = ({
+  setSchema,
+  setJson,
+  setText,
+  setBase64,
+  dropZoneText,
+}) => {
   const onDrop = useCallback((acceptedFiles) => {
     // Do something with the files
     acceptedFiles.forEach((file) => {
@@ -44,9 +62,24 @@ const MyDropZone = ({ setSchema, setJson, dropZoneText }) => {
         // Do whatever you want with the file contents
         const result = reader.result as string;
         if (setSchema) setSchema(processSchema(JSON.parse(result)));
-        else setJson({ fileName: file.path, content: JSON.parse(result) });
+        else if (setJson)
+          setJson({
+            fileName: file.path,
+            content: JSON.parse(result),
+          });
+        else setText({ fileName: file.path, content: result });
       };
-      reader.readAsText(file);
+
+      if (setBase64) {
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          const result = reader.result as string;
+          var b64 = result.replace(/^data:.+;base64,/, "");
+          setBase64({ fileName: file.path, content: b64 });
+        };
+      } else {
+        reader.readAsText(file);
+      }
     });
   }, []);
   const {
@@ -58,7 +91,7 @@ const MyDropZone = ({ setSchema, setJson, dropZoneText }) => {
   } = useDropzone({ onDrop });
 
   return (
-    <div>
+    <div className={clsx("my-drop-zone")}>
       <Container
         {...getRootProps({ isDragActive, isDragAccept, isDragReject })}
       >

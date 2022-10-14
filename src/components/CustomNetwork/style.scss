@@ -1,0 +1,15 @@
+.chain-management {
+  display: flex;
+  flex-direction: column;
+
+  .update-chain {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: flex;
+  }
+
+  .remove-button {
+    background-color: transparent;
+    color: red;
+  }
+}

@@ -6,6 +6,7 @@ import { ReactComponent as IconChain } from "../../assets/icons/chain.svg";
 import { useState } from "react";
 import { ChainInfoWithExplorer } from "src/stores/chain";
 import MyDropZone from "src/components/DropZone";
+import "./style.scss";
 
 const { Option } = Select;
 
@@ -20,17 +21,17 @@ interface CustomNetworkProps {
 }
 
 const CustomNetwork = ({ updateChain }: CustomNetworkProps) => {
-  const defaultChainName = useState(window.chainStore.current.chainName);
-  const [chainInfos, setChainInfos] = useState(window.chainStore.chainInfos);
-  const [jsonFileContent, setJsonFileContent] = useState(
-    {} as ChainInfoWithExplorer
+  const [chainName, setChainName] = useState(
+    window.chainStore.current.chainName
   );
+  const [chainInfos, setChainInfos] = useState(window.chainStore.chainInfos);
+  const [curChain, setCurChain] = useState({} as ChainInfoWithExplorer);
   const [jsonFileName, setJsonFileName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
 
   const handleJsonFile = (file: JsonFile) => {
-    setJsonFileContent(file.content);
+    setCurChain(file.content);
     setJsonFileName(file.fileName || "");
     setUpdateMessage("");
   };
@@ -38,9 +39,11 @@ const CustomNetwork = ({ updateChain }: CustomNetworkProps) => {
   const onAddChain = () => {
     try {
       setErrorMessage("");
-      if (jsonFileContent.chainId) {
-        window.chainStore.addChain(jsonFileContent);
+      if (curChain.chainId) {
+        window.chainStore.addChain(curChain);
         // set chain to auto trigger new chain store
+        window.chainStore.setChain(curChain.chainName);
+        setChainName(curChain.chainName);
         setChainInfos(window.chainStore.chainInfos);
         setUpdateMessage("Successfully added the new chain");
       } else throw "Invalid chain data";
@@ -75,11 +78,12 @@ const CustomNetwork = ({ updateChain }: CustomNetworkProps) => {
         <h3> Select chain name</h3>
       </div>
       <Select
-        defaultValue={defaultChainName}
+        value={chainName}
         style={{ width: 240 }}
         suffixIcon={<IconSelect />}
         onSelect={(value) => {
           window.chainStore.setChain(value);
+          setChainName(value);
           updateChain(value);
         }}
       >
@@ -91,14 +95,16 @@ const CustomNetwork = ({ updateChain }: CustomNetworkProps) => {
       </Select>
       <div className="chain-management">
         <div className="update-chain">
-          <Button onClick={onAddChain} className="primary-button">
+          <Button onClick={onAddChain}
+            disabled={!jsonFileName}
+            className="primary-button">
             Add new chain
           </Button>
           <Button onClick={onRemoveChain} className="remove-button">
             Remove chain
           </Button>
         </div>
-        {_.isEmpty(jsonFileContent) && (
+        {_.isEmpty(curChain) && (
           <div
             style={{
               display: "flex",
@@ -107,7 +113,6 @@ const CustomNetwork = ({ updateChain }: CustomNetworkProps) => {
             }}
           >
             <MyDropZone
-              setSchema={null}
               setJson={handleJsonFile}
               dropZoneText={
                 "Upload the chain info json file here to add / remove chain"
@@ -130,7 +135,7 @@ const CustomNetwork = ({ updateChain }: CustomNetworkProps) => {
             <Button
               onClick={() => {
                 // reset state
-                setJsonFileContent({} as ChainInfoWithExplorer);
+                setCurChain({} as ChainInfoWithExplorer);
                 setJsonFileName("");
                 setUpdateMessage("");
                 setErrorMessage("");

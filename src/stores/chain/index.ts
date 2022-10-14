@@ -24,7 +24,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithExplorer> {
   constructor(embedChainInfos: ChainInfoWithExplorer[]) {
     // get chains from local storage first. If empty then set it. If not then use it instead of default
     let chains: ChainInfoWithExplorer[] = JSON.parse(
-      localStorage.getItem("chain-info") || ""
+      localStorage.getItem("chain-info") || "[]"
     );
     if (chains) {
       chains = [...chains, ...embedChainInfos] as ChainInfoWithExplorer[];

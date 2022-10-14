@@ -1,27 +1,29 @@
 // hot reload
 import { LoadingOutlined } from "@ant-design/icons";
 import Form from "@rjsf/antd";
+import validator from "@rjsf/validator-ajv6";
 import { Button, Popconfirm, Spin, Tabs } from "antd";
 import "antd/dist/antd.css";
 import _, { isNil } from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import ReactJson from "react-json-view";
+import CustomForm from "src/components/CustomForm";
+import CustomInput from "src/components/CustomInput";
+import CustomNetwork from "src/components/CustomNetwork";
+import CustomSelect from "src/components/CustomSelect";
+import GasForm from "src/components/GasForm";
+import HandleOptions from "src/components/HandleOptions";
+import { selectQuerySchema } from "src/stores/contract/slice";
+import { useAppSelector } from "src/stores/hooks";
 import { ContractType } from "src/types/contract";
+import logo from "../../assets/images/logo.png";
+import RemoveIcon from "../../assets/images/remove.png";
 import CosmJsFactory from "../../lib/cosmjs-factory";
 import { parseGasLimits, processSchema } from "../../lib/utils";
 import { AdvancedInteraction } from "../../pages";
 import instantiateOptionsSchema from "../../types/schema/instantiate-options";
 import DropdownItem from "../Collapse";
-import RemoveIcon from "../../assets/images/remove.png";
-import logo from "../../assets/images/logo.png";
-import "./style.css";
-import CustomSelect from "src/components/CustomSelect";
-import GasForm from "src/components/GasForm";
-import HandleOptions from "src/components/HandleOptions";
-import CustomForm from "src/components/CustomForm";
-import CustomInput from "src/components/CustomInput";
-import CustomNetwork from "src/components/CustomNetwork";
-import validator from "@rjsf/validator-ajv6";
+import "./style.scss";
 
 const { TabPane } = Tabs;
 const antIcon = (
@@ -50,16 +52,11 @@ const Cosm: React.FC = () => {
   const [migrateSchema, setMigrateSchema] = useState(undefined);
   const [migrateSchemaData, setMigrateSchemaData] = useState("");
   const [migrateContractAddr, setMigrateContractAddr] = useState("");
-  const [querySchema, setQuerySchema] = useState({});
   const [handleSchema, setHandleSchema] = useState({});
-  const [schema, setSchema] = useState({});
-  // const [resultJson, setResultJson] = useState({});
   const [resultJson, setResultJson] = useState<
-    Array<{
-      contract: string;
-      data: any;
-    }>
+    Array<{ contract: string; data: any }>
   >([]);
+  const querySchema = useAppSelector(selectQuerySchema);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isInteractionLoading, setIsInteractionLoading] = useState(false);
@@ -99,14 +96,13 @@ const Cosm: React.FC = () => {
     }
   };
 
-  const handleBuild = function (message: ContractType) {
+  const handleBuild = function(message: ContractType) {
     setInitSchema(processSchema(JSON.parse(message.schemaFile as string)));
     !_.isNil(message?.migrateSchemaFile) &&
       setMigrateSchema(
         processSchema(JSON.parse(message?.migrateSchemaFile as string)) || null
       );
     setHandleSchema({});
-    setQuerySchema({});
     setIsBuilt(true);
     setIsUploaded(false);
     setIsDeployed(false);
@@ -116,7 +112,7 @@ const Cosm: React.FC = () => {
     setResultTxHash(null);
   };
 
-  const handleDeploy = function (message: ContractType) {
+  const handleDeploy = function(message: ContractType) {
     // console.log("query file: ", message.queryFile);
     let handleFile = processSchema(JSON.parse(message.handleFile as string));
     let queryFile = processSchema(JSON.parse(message.queryFile as string));
@@ -124,7 +120,6 @@ const Cosm: React.FC = () => {
       ? processSchema(JSON.parse(message.migrateFile as string))
       : null;
     setHandleSchema(handleFile);
-    setQuerySchema(queryFile);
     onDeploy(
       message.mnemonic,
       message.payload,
@@ -135,13 +130,13 @@ const Cosm: React.FC = () => {
     );
   };
 
-  const handleUpload = function (message: ContractType) {
+  const handleUpload = function(message: ContractType) {
     console.log("message upload: ", message);
     setInitSchema(processSchema(JSON.parse(message.schemaFile as string)));
     onUpload(message.mnemonic, message.payload);
   };
 
-  const handleInstantiate = function (message: ContractType) {
+  const handleInstantiate = function(message: ContractType) {
     console.log("message instantiate: ", message);
     let handleFile = processSchema(JSON.parse(message.handleFile as string));
     let queryFile = processSchema(JSON.parse(message.queryFile as string));
@@ -149,7 +144,6 @@ const Cosm: React.FC = () => {
       ? processSchema(JSON.parse(message?.migrateFile as string))
       : null;
     setHandleSchema(handleFile);
-    setQuerySchema(queryFile);
     onInstantiate(
       message.mnemonic,
       handleFile,
@@ -494,42 +488,44 @@ const Cosm: React.FC = () => {
     setIsInteractionLoading(false);
   };
 
+  const contractLoading = !isLoading ? (
+    arrayContract.length ? (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <span>Contract address </span>
+        <Popconfirm
+          title="delete all contact address?"
+          onConfirm={() => removeContract("")}
+          okText="Yes"
+          placement="top"
+          cancelText="No"
+        >
+          <img
+            className="click"
+            src={RemoveIcon}
+            width={20}
+            height={20}
+            alt=""
+          />
+        </Popconfirm>
+      </div>
+    ) : (
+      <></>
+    )
+  ) : (
+    <div className="deploying">
+      <Spin indicator={antIcon} />
+      <span>{ideAction} ...</span>
+    </div>
+  );
+
   const contract = (
     <div className="contract">
-      {!isLoading ? (
-        arrayContract.length ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <span>Contract address </span>
-            <Popconfirm
-              title="delete all contact address?"
-              onConfirm={() => removeContract("")}
-              okText="Yes"
-              placement="top"
-              cancelText="No"
-            >
-              <img
-                className="click"
-                src={RemoveIcon}
-                width={20}
-                height={20}
-                alt=""
-              />
-            </Popconfirm>
-          </div>
-        ) : (
-          <></>
-        )
-      ) : (
-        <div className="deploying">
-          <Spin indicator={antIcon} />
-          <span>{ideAction} ...</span>
-        </div>
-      )}
+      {contractLoading}
       {!isLoading &&
         arrayContract &&
         arrayContract.map((e: any, i: Number) => {
@@ -631,125 +627,133 @@ const Cosm: React.FC = () => {
     </div>
   );
 
-  const build = isBuilt && (
+  const items = [
+    {
+      label: "Instantiate",
+      key: "1",
+      children: (
+        <>
+          <div className="wrap-form">
+            <span className="please-text">
+              Please fill out the form below to deploy the contract:
+            </span>
+            <CustomInput
+              inputHeader="input label"
+              input={label}
+              setInput={setLabel}
+            />
+            <GasForm gasData={gasData} setGasData={setGasData}>
+              {}
+            </GasForm>
+            <CustomInput
+              inputHeader="Code Id"
+              input={codeId}
+              setInput={setCodeId}
+            />
+            {!isUploaded && (
+              <div>
+                <CustomInput
+                  inputHeader="Source code url"
+                  input={deploySource}
+                  setInput={setDeploySource}
+                  placeholder="eg. https://foobar.com"
+                />
+                <CustomInput
+                  inputHeader="Contract builder (Docker img with tag)"
+                  input={deployBuilder}
+                  setInput={setDeployBuilder}
+                  placeholder="eg. orai/orai:0.40.1"
+                />
+              </div>
+            )}
+            <div className="input-form">
+              <Form
+                schema={instantiateOptionsSchema as any}
+                validator={validator}
+                formData={instantiateOptions}
+                onChange={handleOnInstantiateOptChange}
+                // onSubmit={(data) => setInitSchemaData(data.formData)}
+                children={true}
+              />
+            </div>
+          </div>
+          <Form
+            schema={initSchema as any}
+            validator={validator}
+            formData={initSchemaData}
+            onChange={handleOnChange}
+            onSubmit={(data) => setInitSchemaData(data.formData)}
+            children={true}
+          />
+        </>
+      ),
+    }, // remember to pass the key prop
+    {
+      label: "Migrate",
+      key: "2",
+      children: !_.isNil(migrateSchema) && (
+        <div className="wrap-form">
+          <span className="please-text">
+            Please fill out the form below to migrate the contract:
+          </span>
+          <CustomInput
+            inputHeader="Code Id"
+            input={codeId}
+            setInput={setCodeId}
+          />
+          <CustomInput
+            inputHeader="Contract Address"
+            input={migrateContractAddr}
+            setInput={setMigrateContractAddr}
+          />
+          <GasForm gasData={gasData} setGasData={setGasData}>
+            <CustomInput
+              inputHeader="Wallet mnemonic (optional)"
+              input={mnemonic}
+              setInput={setMnemonic}
+              placeholder="eg. foo bar"
+              type={"password"}
+            />
+          </GasForm>
+          <Form
+            schema={migrateSchema}
+            validator={validator}
+            formData={migrateSchemaData}
+            onChange={handleOnMigrateSchemaChange}
+            onSubmit={(data) => setMigrateSchemaData(data.formData)}
+            children={true}
+          />
+          <div className="button-wrapper">
+            <Button
+              onClick={() => {
+                onMigrate(migrateSchemaData, migrateContractAddr);
+              }}
+              className="primary-button"
+            >
+              Migrate
+            </Button>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  const build = (
     <div>
       <div className="cosm-body">
         <CustomNetwork updateChain={updateChain} />
-
         <Tabs
           hideAdd={true}
           className="tabs"
           defaultActiveKey="1"
-          onChange={() => {}}
-        >
-          <TabPane className="tab" tab="Instantiate" key="1">
-            <>
-              <div className="wrap-form">
-                <span className="please-text">
-                  Please fill out the form below to deploy the contract:
-                </span>
-                <CustomInput
-                  inputHeader="input label"
-                  input={label}
-                  setInput={setLabel}
-                />
-                <GasForm gasData={gasData} setGasData={setGasData}>
-                  {}
-                </GasForm>
-                <CustomInput
-                  inputHeader="Code Id"
-                  input={codeId}
-                  setInput={setCodeId}
-                />
-                {!isUploaded && (
-                  <div>
-                    <CustomInput
-                      inputHeader="Source code url"
-                      input={deploySource}
-                      setInput={setDeploySource}
-                      placeholder="eg. https://foobar.com"
-                    />
-                    <CustomInput
-                      inputHeader="Contract builder (Docker img with tag)"
-                      input={deployBuilder}
-                      setInput={setDeployBuilder}
-                      placeholder="eg. orai/orai:0.40.1"
-                    />
-                  </div>
-                )}
-                <div className="input-form">
-                  <Form
-                    schema={instantiateOptionsSchema as any}
-                    validator={validator}
-                    formData={instantiateOptions}
-                    onChange={handleOnInstantiateOptChange}
-                    // onSubmit={(data) => setInitSchemaData(data.formData)}
-                    children={true}
-                  />
-                </div>
-              </div>
-              <Form
-                schema={initSchema as any}
-                validator={validator}
-                formData={initSchemaData}
-                onChange={handleOnChange}
-                onSubmit={(data) => setInitSchemaData(data.formData)}
-                children={true}
-              />
-            </>
-          </TabPane>
-          {!_.isNil(migrateSchema) && (
-            <TabPane className="tab" tab="Migrate" key="2">
-              <div className="wrap-form">
-                <span className="please-text">
-                  Please fill out the form below to migrate the contract:
-                </span>
-                <CustomInput
-                  inputHeader="Code Id"
-                  input={codeId}
-                  setInput={setCodeId}
-                />
-                <CustomInput
-                  inputHeader="Contract Address"
-                  input={migrateContractAddr}
-                  setInput={setMigrateContractAddr}
-                />
-                <GasForm gasData={gasData} setGasData={setGasData}>
-                  <CustomInput
-                    inputHeader="Wallet mnemonic (optional)"
-                    input={mnemonic}
-                    setInput={setMnemonic}
-                    placeholder="eg. foo bar"
-                    type={"password"}
-                  />
-                </GasForm>
-                <Form
-                  schema={migrateSchema}
-                  validator={validator}
-                  formData={migrateSchemaData}
-                  onChange={handleOnMigrateSchemaChange}
-                  onSubmit={(data) => setMigrateSchemaData(data.formData)}
-                  children={true}
-                />
-                <div className="button-wrapper">
-                  <Button
-                    onClick={() => {
-                      onMigrate(migrateSchemaData, migrateContractAddr);
-                    }}
-                    className="primary-button"
-                  >
-                    Migrate
-                  </Button>
-                </div>
-              </div>
-            </TabPane>
-          )}
-        </Tabs>
+          onChange={() => { }}
+          items={items}
+        />
       </div>
     </div>
   );
 
-  const fallback = (
+  const advancedInteraction = (
     <AdvancedInteraction
       updateChain={updateChain}
       gasData={gasData}
@@ -767,7 +771,7 @@ const Cosm: React.FC = () => {
     </AdvancedInteraction>
   );
 
-  const interactionLoading = !isInteractionLoading ? (
+  const interactionLoading = (
     <>
       {errorMessage && (
         <div className="contract-address">
@@ -782,11 +786,6 @@ const Cosm: React.FC = () => {
         </div>
       )}
     </>
-  ) : (
-    <div className="deploying">
-      <Spin indicator={antIcon} />
-      <span>Invoking ...</span>
-    </div>
   );
 
   return (
@@ -798,14 +797,21 @@ const Cosm: React.FC = () => {
       <div className="cosm-divider" />
 
       {contract}
-      {interactionLoading}
-      {build}
+      {isInteractionLoading ? (
+        <div className="deploying">
+          <Spin indicator={antIcon} />
+          <span>Invoking ...</span>
+        </div>
+      ) : (
+        interactionLoading
+      )}
+      {isBuilt && build}
       {!isBuilt &&
         !isDeployed &&
         !isLoading &&
         !isUploaded &&
         !errorMessage &&
-        fallback}
+        advancedInteraction}
     </div>
   );
 };

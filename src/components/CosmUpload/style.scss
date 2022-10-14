@@ -1,0 +1,25 @@
+.custom-actions {
+  h4 {
+    color: #c4c6c9;
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: Bebas;
+  }
+  &.wrap-form {
+    .button-wrapper {
+      display: flex;
+      justify-content: flex-start;
+    }
+  }
+
+  .wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .input-form {
+      width: 15rem;
+    }
+  }
+}

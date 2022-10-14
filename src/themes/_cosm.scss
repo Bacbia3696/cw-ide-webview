@@ -4,6 +4,69 @@
   overflow: auto;
   padding: 16px 20px;
   max-width: 40rem;
+  div {
+    color: rgb(196, 198, 201);
+    font-family: "Courier";
+  }
+
+  .primary-button {
+    background: #7954ff;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: "Courier";
+
+    &:hover,
+    &:focus {
+      background: #5e3fce;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      font-size: 16px;
+      font-family: "Courier";
+    }
+  }
+
+  .remove-button {
+    background: none;
+    border: none;
+    color: #ff6969;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: "Courier";
+
+    &:hover,
+    &:focus {
+      background: none;
+      border: none;
+      color: #cc4a4a;
+      border-radius: 4px;
+      font-size: 16px;
+      font-family: "Courier";
+    }
+  }
+
+  .remove-secondary {
+    background: none;
+    border: none;
+    color: #c4c6c9;
+    border-radius: 4px;
+    border: 1px solid #c4c6c9;
+    font-size: 14px;
+    font-family: "Courier";
+
+    &:hover,
+    &:focus {
+      background: none;
+      border: none;
+      color: #c4c6c9;
+      border-radius: 4px;
+      border: 1px solid #c4c6c9;
+      font-size: 14px;
+      font-family: "Courier";
+    }
+  }
 
   .cosm-header {
     color: white;
@@ -94,80 +157,6 @@
   background: #4b4a50;
 }
 
-.chain-management {
-  display: flex;
-  flex-direction: column;
-
-  .primary-button {
-    background: #7954ff;
-    border: none;
-    color: white;
-    border-radius: 4px;
-    // font-weight: bold;
-    font-size: 16px;
-    font-family: "Courier";
-
-    &:hover,
-    &:focus {
-      background: #5e3fce;
-      border: none;
-      color: white;
-      border-radius: 4px;
-      // font-weight: bold;
-      font-size: 16px;
-      font-family: "Courier";
-    }
-  }
-
-  .remove-button {
-    background: none;
-    border: none;
-    color: #ff6969;
-    border-radius: 4px;
-    // font-weight: bold;
-    font-size: 16px;
-    font-family: "Courier";
-
-    &:hover,
-    &:focus {
-      background: none;
-      border: none;
-      color: #cc4a4a;
-      border-radius: 4px;
-      // font-weight: bold;
-      font-size: 16px;
-      font-family: "Courier";
-    }
-  }
-
-  .remove-secondary {
-    background: none;
-    border: none;
-    color: #c4c6c9;
-    border-radius: 4px;
-    border: 1px solid #c4c6c9;
-    font-size: 14px;
-    font-family: "Courier";
-
-    &:hover,
-    &:focus {
-      background: none;
-      border: none;
-      color: #c4c6c9;
-      border-radius: 4px;
-      border: 1px solid #c4c6c9;
-      font-size: 14px;
-      font-family: "Courier";
-    }
-  }
-
-  .update-chain {
-    padding-top: 15px;
-    padding-bottom: 15px;
-    display: flex;
-  }
-}
-
 .wrap-form {
   border: 1px dashed #595959;
   padding: 16px 16px 0px 16px;
@@ -179,7 +168,6 @@
     border: none;
     color: white;
     border-radius: 4px;
-    // font-weight: bold;
     font-size: 16px;
     font-family: "Courier";
 
@@ -189,7 +177,6 @@
       border: none;
       color: white;
       border-radius: 4px;
-      // font-weight: bold;
       font-size: 16px;
       font-family: "Courier";
     }
@@ -243,7 +230,6 @@
       border: none;
       color: white;
       font-family: "Courier";
-      font-weight: bold;
       font-size: 16px;
     }
   }
