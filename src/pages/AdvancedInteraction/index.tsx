@@ -1,10 +1,10 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { Button, Spin } from "antd";
 import _, { isNil } from "lodash";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactJson from "react-json-view";
+import CosmInstantiate from "src/components/CosmInstantiate";
 import CosmUpload from "src/components/CosmUpload";
-import CosmAddress from "src/components/CosmAddress";
 import CustomForm from "src/components/CustomForm";
 import CustomInput from "src/components/CustomInput";
 import CustomNetwork from "src/components/CustomNetwork";
@@ -13,8 +13,12 @@ import MyDropZone from "src/components/DropZone";
 import HandleOptions from "src/components/HandleOptions";
 import CosmJsFactory from "src/lib/cosmjs-factory";
 import { parseGasLimits } from "src/lib/utils";
-import { updateSchemaFile } from "src/stores/contract/slice";
-import { useAppDispatch } from "src/stores/hooks";
+import {
+  selectAddress,
+  selectQuerySchema,
+  updateSchemaFile,
+} from "src/stores/contract/slice";
+import { useAppDispatch, useAppSelector } from "src/stores/hooks";
 import "../../themes/style.scss";
 import "./style.scss";
 
@@ -35,7 +39,6 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
   mnemonic,
 }) => {
   const [interactOption, setInteractOption] = useState("query");
-  const [contractAddr, setContractAddr] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [resultJson, setResultJson] = useState({});
   const [isInteractionLoading, setIsInteractionLoading] = useState(false);
@@ -43,23 +46,24 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
   const [queryMessage, setQueryMessage] = useState("");
   const [executeMessage, setExecuteMessage] = useState("");
   const [migrateMessage, setMigrateMessage] = useState("");
-  const [querySchema, setQuerySchema] = useState({});
   const [handleSchema, setHandleSchema] = useState({});
   const [migrateSchema, setMigrateSchema] = useState({});
   const [codeId, setCodeId] = useState("");
   const [migrateContractAddr, setMigrateContractAddr] = useState("");
   const handleOptionsRef = useRef(null);
 
-  const [fileName, setFileName] = useState("");
+  const [schemaFileName, setSchemaFileName] = useState("");
   const dispatch = useAppDispatch();
+  const querySchema = useAppSelector(selectQuerySchema);
+  const contractAddr = useAppSelector(selectAddress);
 
   const handleJsonFile = (file: { fileName: string; content: any }) => {
-    setFileName(file.fileName);
+    setSchemaFileName(file.fileName);
     dispatch(updateSchemaFile(file.content));
   };
 
-  const handleRemove = () => {
-    setFileName("");
+  const handleRemoveSchema = () => {
+    setSchemaFileName("");
     dispatch(updateSchemaFile({}));
   };
 
@@ -156,13 +160,13 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
             </Button>
           </div>
         )) || (
-            <div style={{ marginBottom: "10px" }}>
-              <CustomForm
-                schema={querySchema}
-                onSubmit={(data) => onQuery(data)}
-              />
-            </div>
-          )}
+          <div style={{ marginBottom: "10px" }}>
+            <CustomForm
+              schema={querySchema}
+              onSubmit={(data) => onQuery(data)}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -252,10 +256,10 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
     interactOption === "execute"
       ? executionForm
       : "query"
-        ? queryForm
-        : "migration"
-          ? migrateForm
-          : null;
+      ? queryForm
+      : "migration"
+      ? migrateForm
+      : null;
 
   const result = (
     <div style={{ marginTop: "10px" }}>
@@ -273,22 +277,22 @@ const AdvancedInteraction: React.FC<AdvancedInteractionProps> = ({
     <div className="cosm-body">
       <CustomNetwork updateChain={updateChain} />
       <CosmUpload />
-      <CosmAddress />
-
       <div className="app-divider" />
-      {(fileName && (
+      {(schemaFileName && (
         <div>
-          <div>{`file name: ${fileName}`}</div>
-          <Button onClick={handleRemove} className="remove-secondary">
+          <div>{`file name: ${schemaFileName}`}</div>
+          <Button onClick={handleRemoveSchema} className="remove-secondary">
             Remove CosmWasm schema
           </Button>
         </div>
       )) || (
-          <MyDropZone
-            setJson={handleJsonFile}
-            dropZoneText={"Upload the CosmWasm schema"}
-          />
-        )}
+        <MyDropZone
+          setJson={handleJsonFile}
+          dropZoneText={"Upload the CosmWasm schema"}
+        />
+      )}
+      <CosmInstantiate />
+      <div className="app-divider" />
       <CustomSelect
         displayMigrateOption={true}
         setInteractOption={setInteractOption}

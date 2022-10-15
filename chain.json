@@ -1,0 +1,51 @@
+{
+  "rpc": "http://localhost:26657",
+  "rest": "http://localhost:1317",
+  "chainId": "ShareRing-VoyagerNet",
+  "chainName": "local",
+  "stakeCurrency": {
+    "coinDenom": "shr",
+    "coinMinimalDenom": "nshr",
+    "coinDecimals": 9,
+    "coinImageUrl": "http://localhost:3000/public/assets/tokens/orai.png"
+  },
+  "bip44": {
+    "coinType": 118
+  },
+  "bech32Config": {
+    "bech32PrefixAccAddr": "shareledger",
+    "bech32PrefixAccPub": "shareledgerpub",
+    "bech32PrefixConsAddr": "shareledgervalcons",
+    "bech32PrefixConsPub": "shareledgervalconspub",
+    "bech32PrefixValAddr": "shareledgervaloper",
+    "bech32PrefixValPub": "shareledgervaloperpub"
+  },
+  "currencies": [
+    {
+      "coinDenom": "shr",
+      "coinMinimalDenom": "nshr",
+      "coinDecimals": 9,
+      "coinImageUrl": "http://localhost:3000/public/assets/tokens/orai.png"
+    }
+  ],
+  "feeCurrencies": [
+    {
+      "coinDenom": "shr",
+      "coinMinimalDenom": "nshr",
+      "coinDecimals": 9,
+      "coinImageUrl": "http://localhost:3000/public/assets/tokens/orai.png",
+      "gasPriceStep": {
+        "low": 25000,
+        "average": 50000,
+        "high": 100000
+      }
+    }
+  ],
+  "gasPriceStep": {
+    "low": 25000,
+    "average": 50000,
+    "high": 100000
+  },
+  "features": ["stargate", "ibc-transfer", "cosmwasm"],
+  "cosmwasmVersion": "1.0.0"
+}

@@ -1,18 +1,20 @@
+import { LoadingOutlined } from "@ant-design/icons";
 import { Button, Spin } from "antd";
 import clsx from "clsx";
+import { parseInt } from "lodash";
 import { useEffect, useState } from "react";
+import CustomInput from "src/components/CustomInput";
 import MyDropZone from "src/components/DropZone";
-import { useAppDispatch, useAppSelector } from "src/stores/hooks";
 import {
+  selectCodeId,
   selectError,
   selectIsLoading,
   selectResult,
+  updateCodeId,
   uploadCosmWasm,
 } from "src/stores/contract/slice";
+import { useAppDispatch, useAppSelector } from "src/stores/hooks";
 import "./style.scss";
-import CustomInput from "src/components/CustomInput";
-import _ from "lodash";
-import { LoadingOutlined } from "@ant-design/icons";
 
 const antIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#7954FF" }} spin />
@@ -23,33 +25,33 @@ interface CosmActionsProps {
 }
 
 const CosmUpload: React.FC<CosmActionsProps> = ({ className }) => {
-  const [fileName, setFileName] = useState("");
+  const [wasmFileName, setWasmFileName] = useState("");
   const [wasm, setWasm] = useState("");
-  const [codeId, setCodeId] = useState<number | undefined>(undefined);
   const dispatch = useAppDispatch();
 
   const errorMessage = useAppSelector(selectError);
   const result = useAppSelector(selectResult);
   const isLoading = useAppSelector(selectIsLoading);
+  const codeId = useAppSelector(selectCodeId);
 
   const handleBase64File = (file: { fileName: string; content: string }) => {
-    setFileName(file.fileName);
+    setWasmFileName(file.fileName);
     setWasm(file.content);
   };
 
   useEffect(() => {
-    setCodeId(result);
+    let codeId = parseInt(result);
+    dispatch(updateCodeId(codeId));
   }, [result]);
 
-  const handleRemove = () => {
-    setFileName("");
+  const handleRemoveWasm = () => {
+    setWasmFileName("");
   };
 
-  const handleUpload = () => {
+  const handleUploadWasm = () => {
     dispatch(uploadCosmWasm(wasm));
   };
 
-  //TODO: update
   const displayErr = (
     <div>
       <span style={{ color: "red" }}>Error message </span>
@@ -57,27 +59,30 @@ const CosmUpload: React.FC<CosmActionsProps> = ({ className }) => {
     </div>
   );
 
+  const displayWasmUpload = (wasmFileName && (
+    <div>
+      <div>{`file name: ${wasmFileName}`}</div>
+      <Button onClick={handleRemoveWasm} className="remove-secondary">
+        Remove CosmWasm
+      </Button>
+    </div>
+  )) || (
+    <MyDropZone
+      setBase64={handleBase64File}
+      dropZoneText={"Upload the CosmWasm binary code"}
+    />
+  );
+
   return (
-    <div className={clsx("wrap-form", className, "custom-actions")}>
+    <div className={clsx("wrap-form", className, "cosm-upload")}>
       <h4>Upload CosmWasm</h4>
-      {(fileName && (
-        <div>
-          <div>{`file name: ${fileName}`}</div>
-          <Button onClick={handleRemove} className="remove-secondary">
-            Remove CosmWasm
-          </Button>
-        </div>
-      )) || (
-        <MyDropZone
-          setBase64={handleBase64File}
-          dropZoneText={"Upload the CosmWasm binary code"}
-        />
-      )}
+      {displayWasmUpload}
+
       <div className="wrapper">
         <Button
-          onClick={handleUpload}
+          onClick={handleUploadWasm}
           className="primary-button"
-          disabled={!fileName}
+          disabled={!wasmFileName}
         >
           Upload CosmWasm
         </Button>
@@ -86,7 +91,8 @@ const CosmUpload: React.FC<CosmActionsProps> = ({ className }) => {
           inputHeader="Code ID"
           input={codeId}
           setInput={(input: any) => {
-            setCodeId(input);
+            let codeId = parseInt(input);
+            dispatch(updateCodeId(codeId));
           }}
           placeholder="eg. 1"
           type={"number"}

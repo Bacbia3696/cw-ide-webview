@@ -25,7 +25,6 @@ import instantiateOptionsSchema from "../../types/schema/instantiate-options";
 import DropdownItem from "../Collapse";
 import "./style.scss";
 
-const { TabPane } = Tabs;
 const antIcon = (
   <LoadingOutlined style={{ fontSize: 24, color: "#7954FF" }} spin />
 );
@@ -46,13 +45,11 @@ const Cosm: React.FC = () => {
     gasDenom: window.chainStore.current.feeCurrencies[0].coinMinimalDenom,
     gasLimits: 2000000,
   });
-  const [contractAddr, setContractAddr] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [initSchema, setInitSchema] = useState(undefined);
   const [migrateSchema, setMigrateSchema] = useState(undefined);
   const [migrateSchemaData, setMigrateSchemaData] = useState("");
   const [migrateContractAddr, setMigrateContractAddr] = useState("");
-  const [handleSchema, setHandleSchema] = useState({});
   const [resultJson, setResultJson] = useState<
     Array<{ contract: string; data: any }>
   >([]);
@@ -96,30 +93,27 @@ const Cosm: React.FC = () => {
     }
   };
 
-  const handleBuild = function(message: ContractType) {
+  const handleBuild = function (message: ContractType) {
     setInitSchema(processSchema(JSON.parse(message.schemaFile as string)));
     !_.isNil(message?.migrateSchemaFile) &&
       setMigrateSchema(
         processSchema(JSON.parse(message?.migrateSchemaFile as string)) || null
       );
-    setHandleSchema({});
     setIsBuilt(true);
     setIsUploaded(false);
     setIsDeployed(false);
     setCodeId(undefined);
-    setContractAddr("");
     setErrorMessage("");
     setResultTxHash(null);
   };
 
-  const handleDeploy = function(message: ContractType) {
+  const handleDeploy = function (message: ContractType) {
     // console.log("query file: ", message.queryFile);
     let handleFile = processSchema(JSON.parse(message.handleFile as string));
     let queryFile = processSchema(JSON.parse(message.queryFile as string));
     let migrateFile = !_.isNil(message.migrateFile as string)
       ? processSchema(JSON.parse(message.migrateFile as string))
       : null;
-    setHandleSchema(handleFile);
     onDeploy(
       message.mnemonic,
       message.payload,
@@ -130,20 +124,19 @@ const Cosm: React.FC = () => {
     );
   };
 
-  const handleUpload = function(message: ContractType) {
+  const handleUpload = function (message: ContractType) {
     console.log("message upload: ", message);
     setInitSchema(processSchema(JSON.parse(message.schemaFile as string)));
     onUpload(message.mnemonic, message.payload);
   };
 
-  const handleInstantiate = function(message: ContractType) {
+  const handleInstantiate = function (message: ContractType) {
     console.log("message instantiate: ", message);
     let handleFile = processSchema(JSON.parse(message.handleFile as string));
     let queryFile = processSchema(JSON.parse(message.queryFile as string));
     let migrateFile = !_.isNil(message?.migrateFile as string)
       ? processSchema(JSON.parse(message?.migrateFile as string))
       : null;
-    setHandleSchema(handleFile);
     onInstantiate(
       message.mnemonic,
       handleFile,
@@ -286,7 +279,6 @@ const Cosm: React.FC = () => {
       setIsUploaded(true);
       setIsBuilt(true);
       setIsDeployed(false);
-      setContractAddr("");
 
       // clear all uploading data
       setDeploySource("");
@@ -333,7 +325,6 @@ const Cosm: React.FC = () => {
       });
       console.log("contract address: ", address);
       setLocalstorage(address, handleFile, queryFile, migrateFile, action);
-      setContractAddr(address);
       setIsDeployed(true);
       setIsBuilt(false);
       setIsUploaded(false);
@@ -746,7 +737,7 @@ const Cosm: React.FC = () => {
           hideAdd={true}
           className="tabs"
           defaultActiveKey="1"
-          onChange={() => { }}
+          onChange={() => {}}
           items={items}
         />
       </div>
